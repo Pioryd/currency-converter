@@ -5,6 +5,7 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "main": "dist/main.js",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
@@ -27,6 +28,8 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^7.6.15",
     "@nestjs/sequelize": "^0.2.0",
+    "@nestjs/serve-static": "^2.1.4",
+    "bignumber.js": "^9.0.1",
     "pg": "^8.6.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",

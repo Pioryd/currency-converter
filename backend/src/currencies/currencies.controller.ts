@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Post, Param } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+
 import { CurrenciesService } from './currencies.service';
 import { ConvertCurrencyDto } from './dto/convert-currency.dto';
 import { CurrencyData } from './interfaces/currency-data.interface';
+import { History } from './models/history.model';
 
-@Controller('currency')
+@Controller('api/currency')
 export class CurrenciesController {
   constructor(private readonly currenciesService: CurrenciesService) {}
 
@@ -17,5 +19,10 @@ export class CurrenciesController {
   @Post('get-list')
   async getList(): Promise<string[]> {
     return this.currenciesService.getList();
+  }
+
+  @Post('get-history')
+  async getHistory(): Promise<History[]> {
+    return this.currenciesService.getHistory();
   }
 }

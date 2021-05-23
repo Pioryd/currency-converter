@@ -21,9 +21,9 @@ export class History extends Model {
   @Column({ allowNull: false })
   currencyTo: string;
 
-  @Column({ type: DataType.DECIMAL(10, 2), allowNull: false })
-  valueFrom: number;
+  @Column({ allowNull: false })
+  valueFrom: string;
 
-  @Column({ type: DataType.DECIMAL(10, 2), allowNull: false })
-  valueTo: number;
+  @Column({ allowNull: false })
+  valueTo: string;
 }

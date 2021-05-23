@@ -1,5 +1,6 @@
 import { Injectable, HttpService } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { BigNumber } from 'bignumber.js';
 
 import { CurrencyData } from './interfaces/currency-data.interface';
 import { History } from './models/history.model';
@@ -22,17 +23,26 @@ export class CurrenciesService {
     valueFrom,
   }: CurrencyData): Promise<CurrencyData> {
     const { data } = await this.httpService
-      .get(
-        `https://api.ratesapi.io/api/latest?` +
-          `base=${currencyFrom}&symbols=${currencyTo}`,
-      )
+      .get<string>(`https://currency-exchange.p.rapidapi.com/exchange`, {
+        params: { to: currencyTo, from: currencyFrom },
+        headers: {
+          'x-rapidapi-key':
+            '648f4982admsh8375f42db2eda1dp159e7cjsnaa1ebc0ae5f4',
+          'x-rapidapi-host': 'currency-exchange.p.rapidapi.com',
+        },
+      })
       .toPromise();
+
+    const currencyRate = data;
 
     const response: CurrencyData = {
       currencyFrom,
       currencyTo,
       valueFrom,
-      valueTo: Number((valueFrom * data.rates[currencyTo]).toPrecision(3)),
+      valueTo: new BigNumber(valueFrom)
+        .times(currencyRate)
+        .toFixed(2)
+        .toString(),
     };
 
     this.historyModel.create(response);
@@ -43,11 +53,24 @@ export class CurrenciesService {
   async getList(): Promise<string[]> {
     if (this.list.length === 0) {
       const { data } = await this.httpService
-        .get(`https://api.ratesapi.io/api/latest`)
+        .get(`https://currency-exchange.p.rapidapi.com/listquotes`, {
+          headers: {
+            'x-rapidapi-key': process.env.API_KEY,
+            'x-rapidapi-host': 'currency-exchange.p.rapidapi.com',
+          },
+        })
         .toPromise();
-      this.list = [...Object.keys(data.rates), data.base];
+
+      this.list = data;
     }
 
     return this.list;
+  }
+
+  async getHistory(): Promise<History[]> {
+    return this.historyModel.findAll({
+      order: [['createdAt', 'DESC']],
+      limit: 5,
+    });
   }
 }

@@ -4,16 +4,26 @@ import axios from "axios";
 export interface CurrencyData {
   currencyFrom?: string;
   currencyTo?: string;
-  valueFrom?: number;
-  valueTo?: number;
+  valueFrom?: string;
+  valueTo?: string;
+}
+
+export interface HistoryRecord extends CurrencyData {
+  createdAt: string;
+}
+
+export interface Options {
+  force: boolean;
 }
 
 export interface ContextValue {
   symbols: string[];
-  convertedCurrency: CurrencyData;
+  history: HistoryRecord[];
+  convertedCurrency: CurrencyData | undefined;
   loading: boolean;
-  convertCurrency: (currencyData: CurrencyData) => void;
-  reloadSymbols: () => void;
+  convertCurrency: (currencyData: CurrencyData, options?: Options) => void;
+  reloadSymbols: (options?: Options) => void;
+  reloadHistory: (options?: Options) => void;
 }
 
 export const ApiContext = React.createContext<ContextValue | null>(null);
@@ -32,40 +42,50 @@ export default function Api({ children }: Props) {
   const [loading, setLoading] = React.useState(false);
 
   const [symbols, setSymbols] = React.useState<string[]>([]);
-  const [convertedCurrency, setConvertedCurrency] =
-    React.useState<CurrencyData>({});
+  const [history, setHistory] = React.useState<HistoryRecord[]>([]);
 
-  const convertCurrency = async (currencyData: CurrencyData) => {
+  const [convertedCurrency, setConvertedCurrency] = React.useState<
+    CurrencyData | undefined
+  >({ valueTo: "" });
+
+  const convertCurrency = async (
+    currencyData: CurrencyData,
+    options?: Options
+  ) => {
     try {
-      if (loading) return;
-      setLoading(true);
+      if (!options?.force) {
+        if (loading) return;
+        setLoading(true);
+      }
 
       const { data } = await axios.post<CurrencyData>(
-        process.env.REACT_APP_API_URL + "/currency/convert",
+        process.env.REACT_APP_API_URL + "/api/currency/convert",
         currencyData
       );
 
       if (!mountedRef.current) return;
 
-      setConvertedCurrency(data || {});
+      setConvertedCurrency(data);
     } catch (err) {
       console.error(err);
 
       if (!mountedRef.current) return;
-      setConvertedCurrency({ ...currencyData, valueTo: undefined });
+      setConvertedCurrency(undefined);
     } finally {
       if (!mountedRef.current) return;
-      setLoading(false);
+      if (!options?.force) setLoading(false);
     }
   };
 
-  const reloadSymbols = async () => {
+  const reloadSymbols = async (options?: Options) => {
     try {
-      if (loading) return;
-      setLoading(true);
+      if (!options?.force) {
+        if (loading) return;
+        setLoading(true);
+      }
 
       const { data } = await axios.post<string[]>(
-        process.env.REACT_APP_API_URL + "/currency/get-list"
+        process.env.REACT_APP_API_URL + "/api/currency/get-list"
       );
 
       if (!mountedRef.current) return;
@@ -78,7 +98,32 @@ export default function Api({ children }: Props) {
       setSymbols([]);
     } finally {
       if (!mountedRef.current) return;
-      setLoading(false);
+      if (!options?.force) setLoading(false);
+    }
+  };
+
+  const reloadHistory = async (options?: Options) => {
+    try {
+      if (!options?.force) {
+        if (loading) return;
+        setLoading(true);
+      }
+
+      const { data } = await axios.post<HistoryRecord[]>(
+        process.env.REACT_APP_API_URL + "/api/currency/get-history"
+      );
+
+      if (!mountedRef.current) return;
+
+      setHistory(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+
+      if (!mountedRef.current) return;
+      setHistory([]);
+    } finally {
+      if (!mountedRef.current) return;
+      if (!options?.force) setLoading(false);
     }
   };
 
@@ -91,10 +136,12 @@ export default function Api({ children }: Props) {
 
   const contextValue: ContextValue = {
     symbols,
+    history,
     convertedCurrency,
     loading,
     convertCurrency,
-    reloadSymbols
+    reloadSymbols,
+    reloadHistory
   };
 
   return (

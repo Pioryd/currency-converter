@@ -7,19 +7,7 @@ export interface Props {
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    page: {
-      clear: "both",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      border: "none",
-      fontFamily: "sans-serif",
-      background: "white",
-      height: "100vh",
-      boxSizing: "border-box",
-      overflow: "none"
-    }
+    page: {}
   })
 );
 
