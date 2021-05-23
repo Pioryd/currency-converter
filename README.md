@@ -1,5 +1,7 @@
 # Currency converter
 
+## Live preview: [DEMO](http://ec2-13-58-22-232.us-east-2.compute.amazonaws.com/currency-converter)
+
 ## Build with
 
 - **Backend**: bignumber.js, NestJS, Sequelize, TypeScript
