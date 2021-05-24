@@ -1,6 +1,6 @@
 # Currency converter
 
-## Live preview: [DEMO](http://ec2-13-58-22-232.us-east-2.compute.amazonaws.com/currency-converter)
+## Live preview: [DEMO](http://ec2-3-142-143-221.us-east-2.compute.amazonaws.com/currency-converter)
 
 ## Build with
 
